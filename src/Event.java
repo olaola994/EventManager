@@ -1,21 +1,22 @@
+import java.io.Serial;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.io.Serializable;
 
 public abstract class Event implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    @Serial
+    private static final long serialVersionUID = -2990386744991787306L;
 
     private int id;
     private String title;
-    private Date startDate;
-    private Date endDate;
-    private double ticketPrice;
-    private Location location;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private static double ticketPrice = 250.00; // atrybut klasowy
+    private Location location; // atrybut złożony
 
-    public Event(String title, String startDate, String endDate, double ticketPrice, Location location) throws ParseException {
+
+    public Event(String title, LocalDate startDate, LocalDate endDate, double ticketPrice, Location location) throws ParseException {
         this.id = EventManager.generateUniqueId();
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Title nie moze byc null lub pusty");
@@ -24,8 +25,8 @@ public abstract class Event implements Serializable {
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("Data nie moze byc null");
         }
-        this.startDate = sdf.parse(startDate);
-        this.endDate = sdf.parse(endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
         if (ticketPrice < 0) {
             throw new IllegalArgumentException("Ticket price nie moze byc ujemny");
         }
@@ -37,6 +38,7 @@ public abstract class Event implements Serializable {
         this.location = location;
 
         EventManager.addEvent(this);
+
     }
 
     @Override
@@ -61,47 +63,49 @@ public abstract class Event implements Serializable {
     }
 
     public void setTitle(String title) {
+        if(title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Title nie moze byc null");
+        }
         this.title = title;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setStartDate(LocalDate startDate) {
+        if (startDate != null) {
+            this.startDate = startDate;
+        }
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
+    public void setEndDate(LocalDate endDate) {
+        if (endDate != null) {
+            this.endDate = endDate;
+        }
     }
 
-    public String getFormattedStartDate() {
-        return sdf.format(startDate);
-    }
-
-    public String getFormattedEndDate() {
-        return sdf.format(endDate);
-    }
 
     public double getTicketPrice() {
         return ticketPrice;
     }
 
     public void setTicketPrice(double ticketPrice) {
-        this.ticketPrice = ticketPrice;
+        if (ticketPrice > 0) {
+            this.ticketPrice = ticketPrice;
+        }
     }
 
+    // atrybut pochodny
     public long getDuration() {
         if (startDate == null || endDate == null) {
             return 0;
         }
-        long diffInMillis = endDate.getTime() - startDate.getTime();
-        return TimeUnit.MILLISECONDS.toDays(diffInMillis);
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
 
     public abstract String getEventType();
@@ -118,8 +122,8 @@ public abstract class Event implements Serializable {
         return "Event{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", startDate=" + getFormattedStartDate() +
-                ", endDate=" + getFormattedEndDate() +
+                ", startDate=" + startDate.toString() +
+                ", endDate=" + endDate.toString() +
                 ", ticketPrice=" + ticketPrice +
                 ", duration=" + getDuration() + " dni" +
                 ", location=" + getLocation() +

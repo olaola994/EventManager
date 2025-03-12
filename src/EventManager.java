@@ -4,18 +4,13 @@ import java.util.Collections;
 import java.io.*;
 
 public class EventManager {
-    private static final long serialVersionUID = 1L;
-    private static final Set<Event> eventSet = new HashSet<>();;
-    private static int eventCounter;
+    @Serial
+    private static final long serialVersionUID = 2267496187339548359L;
+    private static Set<Event> eventSet = new HashSet<>(); // ekstensja
     private static int nextId;
-    private static final String fileName = "events.ser";
+    private static final String fileName = "events.txt";
 
-    static {
-        loadEventsFromFile();
-    }
-    public static int getEventCounter() {
-        return eventCounter;
-    }
+
     public static int generateUniqueId() {
         int newId = nextId;
         setNextId(newId+1);
@@ -30,8 +25,8 @@ public class EventManager {
     protected static void addEvent(Event event) {
         if (!eventSet.contains(event)) {
             eventSet.add(event);
-            eventCounter++;
-            saveEventsToFile();
+
+            saveAllExtents();
         }
     }
     protected static void removeEvent(Event event) {
@@ -42,39 +37,44 @@ public class EventManager {
             throw new IllegalArgumentException("Event, ktory probujesz usunac nie istnieje w kolekcji");
         }
         eventSet.remove(event);
-        eventCounter--;
-        saveEventsToFile();
+        saveAllExtents();
     }
-    public static void saveEventsToFile(){
-        try(ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileName))){
-            out.writeObject(eventSet);
-        }catch (IOException e){
+    // trwałość ekstensji
+    public static void writeExtent(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(eventSet);
+    }
+
+    public static void readExtent(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        eventSet = (HashSet<Event>) stream.readObject();
+    }
+    public static void loadAllExtents(){
+        try (ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(
+                new FileInputStream(fileName)))) {
+            nextId = in.readInt();
+            EventManager.readExtent(in);
+
+        }catch (IOException | ClassNotFoundException e){
             System.err.println("Blad zapisu do pliku: " + e.getMessage());
         }
     }
-    public static void loadEventsFromFile(){
-        File file = new File(fileName);
-        if(!file.exists()){
-            eventSet.clear();
-            eventCounter = 0;
-            nextId = 1;
-            return;
+    public static void saveAllExtents(){
+        try (ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(
+                new FileOutputStream(fileName)))) {
+
+            out.writeInt(nextId);
+            EventManager.writeExtent(out);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(fileName))){
-            Set<Event> loadedEvents = (Set<Event>) in.readObject();
-            eventSet.clear();
-            eventSet.addAll(loadedEvents);
-            eventCounter = eventSet.size();
-            int maxId = loadedEvents.stream()
-                    .mapToInt(Event::getId)
-                    .max()
-                    .orElse(0);
-
-            nextId = maxId + 1;
-
-            EventManager.setNextId(nextId);
-        }catch (IOException | ClassNotFoundException e){
-            System.err.println("Blad odczytu pliku: " + e.getMessage());
+    }
+    public static int getEventSize(){
+        return eventSet.size();
+    }
+    // metoda klasowa
+    public static void showEvents(){
+        for(Event event : eventSet){
+            System.out.println(event);
         }
     }
 }

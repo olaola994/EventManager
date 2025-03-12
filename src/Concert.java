@@ -1,12 +1,18 @@
+import java.io.Serial;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
 public class Concert extends Event {
-    private static final long serialVersionUID = 1L;
-    private List<String> performers;
+    @Serial
+    private static final long serialVersionUID = -7544500528767035782L;
+    private List<String> performers; // atrybut powtarzalny
 
-    public Concert(String title, String startDate, String endDate, double ticketPrice,  Location location, List<String> performers) throws ParseException {
+    public Concert(String title, LocalDate startDate, LocalDate endDate, double ticketPrice,
+                   Location location, List<String> performers) throws ParseException {
         super(title, startDate, endDate, ticketPrice, location);
         if (performers == null || performers.isEmpty()) {
             throw new IllegalArgumentException("Performers list nie moze byc null lub empty.");
@@ -14,13 +20,21 @@ public class Concert extends Event {
         this.performers = performers;
     }
 
+
+    // przesłonięcie
     @Override
     public String getEventType() {
         return "Concert";
     }
 
     public List<String> getPerformers() {
-        return Collections.unmodifiableList(performers);
+        return performers;
+    }
+    public void setPerformers(List<String> performers) {
+        if (performers == null || performers.isEmpty()) {
+            throw new IllegalArgumentException("Performers list nie moze byc null lub empty.");
+        }
+        this.performers = performers;
     }
 
     @Override
