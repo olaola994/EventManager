@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.io.Serializable;
 
 public abstract class Event implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
     private int id;
@@ -14,10 +15,10 @@ public abstract class Event implements Serializable {
     private double ticketPrice;
     private Location location;
 
-    public Event(int id, String title, String startDate, String endDate, double ticketPrice, Location location) throws ParseException {
-        this.id = id;
+    public Event(String title, String startDate, String endDate, double ticketPrice, Location location) throws ParseException {
+        this.id = EventManager.generateUniqueId();
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Title cannot be null or empty.");
+            throw new IllegalArgumentException("Title nie moze byc null lub pusty");
         }
         this.title = title;
         if (startDate == null || endDate == null) {
@@ -26,12 +27,29 @@ public abstract class Event implements Serializable {
         this.startDate = sdf.parse(startDate);
         this.endDate = sdf.parse(endDate);
         if (ticketPrice < 0) {
-            throw new IllegalArgumentException("Ticket price cannot be negative.");
+            throw new IllegalArgumentException("Ticket price nie moze byc ujemny");
         }
         this.ticketPrice = ticketPrice;
+
+        if (location == null) {
+            throw new IllegalArgumentException("Location nie moze byc null");
+        }
         this.location = location;
 
         EventManager.addEvent(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Event event = (Event) obj;
+        return id == event.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 
     public int getId() {
@@ -42,12 +60,24 @@ public abstract class Event implements Serializable {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Date getStartDate() {
         return startDate;
     }
 
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
     public Date getEndDate() {
         return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public String getFormattedStartDate() {
@@ -62,6 +92,10 @@ public abstract class Event implements Serializable {
         return ticketPrice;
     }
 
+    public void setTicketPrice(double ticketPrice) {
+        this.ticketPrice = ticketPrice;
+    }
+
     public long getDuration() {
         if (startDate == null || endDate == null) {
             return 0;
@@ -73,7 +107,7 @@ public abstract class Event implements Serializable {
     public abstract String getEventType();
 
     public Location getLocation() {
-        return new Location(location.getId(), location.getCity(), location.getStreet(),
+        return new Location(location.getCity(), location.getStreet(),
                 location.getStreetNumber(), location.getApartmentNumber(),
                 location.getPostalCode(), location.getCountry());
     }
@@ -88,6 +122,7 @@ public abstract class Event implements Serializable {
                 ", endDate=" + getFormattedEndDate() +
                 ", ticketPrice=" + ticketPrice +
                 ", duration=" + getDuration() + " dni" +
+                ", location=" + getLocation() +
                 ", type='" + getEventType() + '\'' +
                 '}';
     }

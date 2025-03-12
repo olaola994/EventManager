@@ -3,10 +3,11 @@ import java.util.List;
 import java.util.Collections;
 
 public class Concert extends Event {
+    private static final long serialVersionUID = 1L;
     private List<String> performers;
 
-    public Concert(int id, String title, String startDate, String endDate, double ticketPrice,  Location location, List<String> performers) throws ParseException {
-        super(id, title, startDate, endDate, ticketPrice, location);
+    public Concert(String title, String startDate, String endDate, double ticketPrice,  Location location, List<String> performers) throws ParseException {
+        super(title, startDate, endDate, ticketPrice, location);
         if (performers == null || performers.isEmpty()) {
             throw new IllegalArgumentException("Performers list nie moze byc null lub empty.");
         }

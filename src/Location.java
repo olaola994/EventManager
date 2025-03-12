@@ -1,7 +1,7 @@
 import java.io.Serializable;
 
 public class Location implements Serializable{
-    private int id;
+    private static final long serialVersionUID = 1L;
     private String city;
     private String street;
     private int streetNumber;
@@ -9,8 +9,7 @@ public class Location implements Serializable{
     private String postalCode;
     private String country;
 
-    public Location(int id, String city, String street, int streetNumber, Integer apartmentNumber, String postalCode, String country) {
-        this.id = id;
+    public Location(String city, String street, int streetNumber, Integer apartmentNumber, String postalCode, String country) {
         if (city == null || city.trim().isEmpty()) {
             throw new IllegalArgumentException("City nie moze byc null lub pusty.");
         }
@@ -31,15 +30,10 @@ public class Location implements Serializable{
         this.country = country;
     }
 
-    public Location(int id, String city, String street, int streetNumber, String postalCode, String country) {
-        this(id, city, street, streetNumber, null, postalCode, country);
+    public Location(String city, String street, int streetNumber, String postalCode, String country) {
+        this(city, street, streetNumber, null, postalCode, country);
     }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
+
     public String getCity() {
         return city;
     }
@@ -79,5 +73,15 @@ public class Location implements Serializable{
     public void setCountry(String country) {
         this.country = country;
     }
-
+    @Override
+    public String toString() {
+        return "Location{'" +
+                "city=" + this.getCity() +
+                ", street=" + this.getStreet() +
+                ", streetNumber=" + this.getStreetNumber() +
+                (apartmentNumber != null ? ", apartmentNumber=" + apartmentNumber : "") +
+                ", postalCode=" + this.getPostalCode()  +
+                ", country=" + getCountry() +
+                '}';
+    }
 }
